@@ -3,7 +3,7 @@ import { IError } from '../../../types/IError';
 import { getEnvironment } from '../../../env';
 
 export class AdapterAuthorization {
-  public static async validateAuthBasic(c: Context): Promise<void> {
+  public static async validateAuthBasic(c: Context): Promise<string> {
     const header = c.req.header('Authorization');
     if (!header) throw new IError('No está autorizado para utilizar este servicio', 0, 401);
 
@@ -27,5 +27,6 @@ export class AdapterAuthorization {
     const list = getEnvironment(c).AUTH_BASIC;
     const ok = list.some((cred) => cred.usr === usr && cred.pwd === pwd);
     if (!ok) throw new IError('No está autorizado para utilizar este servicio', 0, 401);
+    return usr;
   }
 }

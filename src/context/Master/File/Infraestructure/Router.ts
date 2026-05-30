@@ -27,7 +27,7 @@ export class Router {
 
   private async uploadFile(c: Context): Promise<Response> {
     try {
-      await AdapterAuthorization.validateAuthBasic(c);
+      const authUser = await AdapterAuthorization.validateAuthBasic(c);
 
       const form = await c.req.formData();
       const raw = form.get('file');
@@ -43,6 +43,7 @@ export class Router {
         nombreArchivo: ((form.get('nombreArchivo') as string) || blob.name) ?? '',
         usuario: (form.get('usuario') as string) ?? '',
       };
+      this.enforceOwner(authUser, body);
 
       const file: EntityFileUpload = {
         originalname: blob.name,
@@ -60,8 +61,9 @@ export class Router {
 
   private async downloadFile(c: Context): Promise<Response> {
     try {
-      await AdapterAuthorization.validateAuthBasic(c);
+      const authUser = await AdapterAuthorization.validateAuthBasic(c);
       const body: EntityDownload = await c.req.json();
+      this.enforceOwner(authUser, body);
       const object = await this.controller.downloadFile(c, body);
 
       return new Response(object.body, {
@@ -79,8 +81,9 @@ export class Router {
 
   private async downloadFileBase64(c: Context): Promise<Response> {
     try {
-      await AdapterAuthorization.validateAuthBasic(c);
+      const authUser = await AdapterAuthorization.validateAuthBasic(c);
       const body: EntityDownload = await c.req.json();
+      this.enforceOwner(authUser, body);
       const object = await this.controller.downloadFile(c, body);
 
       const buffer = await object.arrayBuffer();
@@ -93,13 +96,23 @@ export class Router {
 
   private async getSizeFile(c: Context): Promise<Response> {
     try {
-      await AdapterAuthorization.validateAuthBasic(c);
+      const authUser = await AdapterAuthorization.validateAuthBasic(c);
       const body: EntityDownload = await c.req.json();
+      this.enforceOwner(authUser, body);
       const size = await this.controller.getSizeFile(c, body);
       return c.json(size, 200);
     } catch (error) {
       return this.handleError(c, error);
     }
+  }
+
+  // Amarra la operación al usuario autenticado: el `usuario` del body debe coincidir
+  // con la credencial Basic. Evita que un usuario acceda al bucket de otro.
+  private enforceOwner(authUser: string, body: { usuario: string }): void {
+    if (body.usuario && body.usuario !== authUser) {
+      throw new IError('No autorizado para operar sobre otro usuario', 0, 403);
+    }
+    body.usuario = authUser;
   }
 
   private handleError(c: Context, error: unknown): Response {

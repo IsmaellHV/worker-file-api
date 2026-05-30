@@ -47,6 +47,8 @@ Todos requieren **Basic auth** y `Origin` permitido. Base: `/api/ihv/master/file
 
 `USERS` mapea cada `usuario` a su **propio bucket R2** (`bucket` = nombre del binding) y, opcionalmente, a un prefijo (`path`).
 
+> **Amarre credencial ↔ bucket:** el `usuario` del body debe coincidir con el usuario de Basic auth. Si no coincide → `403`. Así un usuario no puede operar sobre el bucket de otro aunque conozca su nombre.
+
 ### Agregar un usuario nuevo
 
 1. Crear su bucket: `npx wrangler r2 bucket create worker-file-<user>`

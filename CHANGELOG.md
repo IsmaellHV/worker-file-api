@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- `request_log` ahora guarda `ip` (`CF-Connecting-IP`) y `auth_user` (usuario de Basic auth, sin contraseña).
+
+### Changed
+
+- **Un bucket R2 por usuario** (antes un bucket compartido con prefijo). `USERS` mapea `usuario` → binding R2.
+- **Amarre credencial ↔ bucket:** el `usuario` del body debe coincidir con el usuario autenticado (Basic); si no, `403`.
+
 ## [1.0.0] - 2026-05-30
 
 ### Added
