@@ -1,0 +1,5 @@
+PREFIX=v1
+DOMAINS=["cloudflare.com","ismaelhv.com","localhost"]
+ALLOWED_IPS=[]
+AUTH_BASIC=[{"usr":"your_user","pwd":"your_password"}]
+USERS=[{"user":"your_user","path":["base_folder"]}]

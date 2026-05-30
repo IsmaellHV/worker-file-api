@@ -1,0 +1,39 @@
+{
+  "name": "worker-file-api",
+  "version": "1.0.0",
+  "description": "A robust and scalable file storage API built with Hono and Cloudflare R2, designed to run on Cloudflare Workers",
+  "main": "src/index.ts",
+  "keywords": [
+    "hono",
+    "cloudflare-workers",
+    "file-storage",
+    "r2",
+    "api",
+    "typescript",
+    "serverless"
+  ],
+  "author": {
+    "name": "Ismael Hurtado",
+    "email": "ismaelhv@outlook.com",
+    "url": "https://ismaelhv.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20250303.0",
+    "hono": "^4.7.4",
+    "ua-parser-js": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "wrangler": "^4.95.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

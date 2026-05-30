@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "worker-file-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-06",
+  "routes": [
+    {
+      "pattern": "worker-file.ihurtadov.com",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "logs": {
+      "enabled": true
+    }
+  },
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "worker-file-bucket"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB_LOG",
+      "database_name": "worker-file-db",
+      "database_id": "7bcebb7e-f660-4ff6-975c-25992b15d925"
+    }
+  ]
+}
