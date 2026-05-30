@@ -16,8 +16,20 @@
   },
   "r2_buckets": [
     {
-      "binding": "BUCKET",
-      "bucket_name": "worker-file-bucket"
+      "binding": "BUCKET_IHV",
+      "bucket_name": "ihv"
+    },
+    {
+      "binding": "BUCKET_SCI",
+      "bucket_name": "sci"
+    },
+    {
+      "binding": "BUCKET_SISCI",
+      "bucket_name": "sisci"
+    },
+    {
+      "binding": "BUCKET_CALIDAD",
+      "bucket_name": "calidad"
     }
   ],
   "d1_databases": [

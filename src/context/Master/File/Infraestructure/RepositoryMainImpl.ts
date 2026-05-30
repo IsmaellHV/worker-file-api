@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { IError } from '../../../../types/IError';
-import { Bindings, getEnvironment, IUserPath } from '../../../../env';
+import { getEnvironment, IUserBucket } from '../../../../env';
 import { AdapterR2 } from '../../../shared/Infraestructure/AdapterR2';
 import { AdapterFileLog } from '../../../shared/Infraestructure/AdapterFileLog';
 import { EntityUpload } from '../Domain/EntityUpload';
@@ -53,17 +53,17 @@ export class RepositoryMainImpl implements RepositoryMain {
     }
   }
 
-  /** Resuelve bucket, prefijo del usuario y arma la key del objeto. */
+  /** Resuelve el bucket del usuario (un bucket por usuario) y arma la key del objeto. */
   private resolve(c: Context, body: EntityUpload | EntityDownload) {
     const ENVIRONMENT = getEnvironment(c);
-    const bucket = (c.env as Bindings).BUCKET;
-    const db = (c.env as Bindings).DB_LOG;
+    const db = c.env.DB_LOG as unknown as D1Database;
     const origin = c.req.header('origin') || c.req.header('host') || null;
 
-    if (!bucket) throw new IError('Almacenamiento no configurado', 0, 500);
-
-    const cred: IUserPath | undefined = ENVIRONMENT.USERS.find((x) => x.user === body.usuario);
+    const cred: IUserBucket | undefined = ENVIRONMENT.USERS.find((x) => x.user === body.usuario);
     if (!cred) throw new IError('Usuario/Contraseña erróneo', 0, 403);
+
+    const bucket = c.env[cred.bucket] as unknown as R2Bucket;
+    if (!bucket) throw new IError('Almacenamiento no configurado para el usuario', 0, 500);
 
     const directorio = Array.isArray(body.directorio) ? body.directorio : `${body.directorio}`.split(',');
     const key = AdapterR2.buildKey(cred.path || [], directorio, body.nombreArchivo);

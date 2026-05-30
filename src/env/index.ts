@@ -7,7 +7,8 @@ export type Bindings = {
   AUTH_BASIC: string;
   USERS: string;
   DB_LOG: D1Database;
-  BUCKET: R2Bucket;
+  // Un binding R2 por usuario (ej. BUCKET_FILER). Se resuelve dinámicamente por nombre.
+  [binding: string]: R2Bucket | D1Database | string;
 };
 
 export interface IAuthBasic {
@@ -15,15 +16,16 @@ export interface IAuthBasic {
   pwd: string;
 }
 
-export interface IUserPath {
+export interface IUserBucket {
   user: string;
-  path: string[];
+  bucket: string; // nombre del binding R2 declarado en wrangler.jsonc (ej. "BUCKET_FILER")
+  path?: string[]; // prefijo opcional dentro del bucket
 }
 
 export const getEnvironment = (c: Context<{ Bindings: Bindings }>) => ({
-  PREFIX: c.env.PREFIX || '',
-  DOMAINS: c.env.DOMAINS ? JSON.parse(c.env.DOMAINS) : [],
-  ALLOWED_IPS: (c.env.ALLOWED_IPS ? JSON.parse(c.env.ALLOWED_IPS) : []) as string[],
-  AUTH_BASIC: (c.env.AUTH_BASIC ? JSON.parse(c.env.AUTH_BASIC) : []) as IAuthBasic[],
-  USERS: (c.env.USERS ? JSON.parse(c.env.USERS) : []) as IUserPath[],
+  PREFIX: (c.env.PREFIX as string) || '',
+  DOMAINS: c.env.DOMAINS ? JSON.parse(c.env.DOMAINS as string) : [],
+  ALLOWED_IPS: (c.env.ALLOWED_IPS ? JSON.parse(c.env.ALLOWED_IPS as string) : []) as string[],
+  AUTH_BASIC: (c.env.AUTH_BASIC ? JSON.parse(c.env.AUTH_BASIC as string) : []) as IAuthBasic[],
+  USERS: (c.env.USERS ? JSON.parse(c.env.USERS as string) : []) as IUserBucket[],
 });

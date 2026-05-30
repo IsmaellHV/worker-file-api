@@ -21,7 +21,7 @@ export default {
     if (!appPromise) appPromise = run(env);
     const app = await appPromise;
 
-    const db = (env as unknown as Bindings).DB_LOG;
+    const db = (env as unknown as Bindings).DB_LOG as unknown as D1Database;
 
     // Clonar el body ANTES de que app.fetch lo consuma (el body solo se lee una vez).
     // Solo registramos el body en JSON; archivos binarios (multipart) se omiten para no inflar el log.
@@ -53,12 +53,28 @@ export default {
         }
       }
       const url = new URL(request.url);
+      // Extrae el usuario de Basic auth (sin la contraseña) para auditoría.
+      let authUser: string | null = null;
+      const authHeader = request.headers.get('authorization');
+      if (authHeader) {
+        const parts = authHeader.split(' ');
+        if (parts.length === 2 && parts[0].trim().toUpperCase() === 'BASIC') {
+          try {
+            const dec = atob(parts[1].trim());
+            const i = dec.indexOf(':');
+            authUser = i >= 0 ? dec.slice(0, i) : null;
+          } catch {
+            authUser = null;
+          }
+        }
+      }
       ctx.waitUntil(
         AdapterRequestLog.save(db, {
           method: request.method,
           path: url.pathname,
           status: res.status,
           ip: request.headers.get('cf-connecting-ip'),
+          authUser,
           origin: request.headers.get('origin') || request.headers.get('host'),
           userAgent: request.headers.get('user-agent'),
           body,

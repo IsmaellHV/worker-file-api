@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS request_log (
   path TEXT NOT NULL,
   status INTEGER NOT NULL,
   ip TEXT,
+  auth_user TEXT,
   origin TEXT,
   user_agent TEXT,
   body TEXT,

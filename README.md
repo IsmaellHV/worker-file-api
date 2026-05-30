@@ -36,7 +36,8 @@ Todos requieren **Basic auth** y `Origin` permitido. Base: `/api/ihv/master/file
 | POST   | `/getSize`       | JSON: `{ usuario, directorio, nombreArchivo }`         | `number` (bytes)     |
 
 - `directorio`: array (`["docs","2026"]`) o string separado por comas (`"docs,2026"`).
-- La key del objeto en R2 es: `<path-del-usuario>/<directorio>/<nombreArchivo>`.
+- **Un bucket R2 por usuario** (aislamiento total): cada `usuario` se mapea a su propio bucket vía `USERS`.
+- La key del objeto en R2 es: `<path-opcional>/<directorio>/<nombreArchivo>` (el `path` por defecto es vacío, ya que el bucket en sí aísla al usuario).
 
 ## Seguridad (3 capas)
 
@@ -44,7 +45,14 @@ Todos requieren **Basic auth** y `Origin` permitido. Base: `/api/ihv/master/file
 2. **Dominio** — `DOMAINS` valida el `Origin`/`Host` (CORS; falsificable, solo barrera de navegador).
 3. **Basic auth** — `AUTH_BASIC` (secreto). Real garantía de acceso.
 
-`USERS` mapea cada `usuario` a un prefijo de carpeta en el bucket.
+`USERS` mapea cada `usuario` a su **propio bucket R2** (`bucket` = nombre del binding) y, opcionalmente, a un prefijo (`path`).
+
+### Agregar un usuario nuevo
+
+1. Crear su bucket: `npx wrangler r2 bucket create worker-file-<user>`
+2. Añadir binding en `wrangler.jsonc` → `{ "binding": "BUCKET_<USER>", "bucket_name": "worker-file-<user>" }`
+3. Añadir credencial en `AUTH_BASIC` y entrada en `USERS`: `{ "user": "<user>", "bucket": "BUCKET_<USER>", "path": [] }`
+4. `npm run deploy` y actualizar los secrets `AUTH_BASIC` y `USERS`.
 
 ## Variables / Secrets
 
@@ -55,10 +63,10 @@ PREFIX=ihv
 DOMAINS=["ismaelhv.com","ihurtadov.com","localhost"]
 ALLOWED_IPS=["137.184.115.148","38.25.80.239"]
 AUTH_BASIC=[{"usr":"filer","pwd":"***"}]
-USERS=[{"user":"filer","path":["ihv"]}]
+USERS=[{"user":"filer","bucket":"BUCKET_FILER","path":[]}]
 ```
 
-Bindings en `wrangler.jsonc`: `BUCKET` (R2 `worker-file-bucket`), `DB_LOG` (D1 `worker-file-db`).
+Bindings en `wrangler.jsonc`: `BUCKET_FILER` (R2 `worker-file-bucket`, uno por usuario), `DB_LOG` (D1 `worker-file-db`).
 
 ## Desarrollo
 

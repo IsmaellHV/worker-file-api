@@ -3,6 +3,7 @@ export interface IRequestLogRow {
   path: string;
   status: number;
   ip: string | null;
+  authUser: string | null;
   origin: string | null;
   userAgent: string | null;
   body: string | null;
@@ -15,8 +16,8 @@ export class AdapterRequestLog {
     if (!db) return;
     try {
       await db
-        .prepare('INSERT INTO request_log (method, path, status, ip, origin, user_agent, body, error, duration_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        .bind(row.method, row.path, row.status, row.ip, row.origin, row.userAgent, row.body, row.error, row.durationMs)
+        .prepare('INSERT INTO request_log (method, path, status, ip, auth_user, origin, user_agent, body, error, duration_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(row.method, row.path, row.status, row.ip, row.authUser, row.origin, row.userAgent, row.body, row.error, row.durationMs)
         .run();
     } catch (e) {
       console.error('request_log save failed:', e);
