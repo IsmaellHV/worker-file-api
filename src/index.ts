@@ -2,6 +2,9 @@ import { Bindings } from './env';
 import { RouterRest } from './rest/Router';
 import { ServerREST } from './rest/Server';
 import { AdapterRequestLog } from './context/shared/Infraestructure/AdapterRequestLog';
+import { AdapterRetention } from './context/shared/Infraestructure/AdapterRetention';
+
+const RETENTION_DAYS = 365;
 
 let appPromise: Promise<any> | null = null;
 
@@ -85,5 +88,11 @@ export default {
     }
 
     return res;
+  },
+
+  // Cron Trigger: limpia logs viejos para no llenar D1 (ver wrangler.jsonc → triggers.crons).
+  async scheduled(_event: ScheduledController, env: { [key: string]: Bindings }, ctx: ExecutionContext) {
+    const db = (env as unknown as Bindings).DB_LOG as unknown as D1Database;
+    ctx.waitUntil(AdapterRetention.purge(db, ['request_log', 'file_log'], RETENTION_DAYS));
   },
 };

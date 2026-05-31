@@ -2,6 +2,7 @@ import { Hono, Context } from 'hono';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
 import { IError } from '../../../../types/IError';
 import { AdapterAuthorization } from '../../../shared/Infraestructure/AdapterAuthorization';
+import { AdapterRateLimit } from '../../../shared/Infraestructure/AdapterRateLimit';
 import { AdapterConfigure } from './AdapterConfigure';
 import { Controller } from './Controller';
 import { EntityUpload } from '../Domain/EntityUpload';
@@ -28,6 +29,7 @@ export class Router {
   private async uploadFile(c: Context): Promise<Response> {
     try {
       const authUser = await AdapterAuthorization.validateAuthBasic(c);
+      await AdapterRateLimit.check((c.env as any).FILE_LIMITER, `upload:${authUser}`);
 
       const form = await c.req.formData();
       const raw = form.get('file');
