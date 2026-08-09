@@ -40,6 +40,10 @@
     {
       "binding": "BUCKET_CALIDAD",
       "bucket_name": "calidad"
+    },
+    {
+      "binding": "BUCKET_BACKUP",
+      "bucket_name": "backup"
     }
   ],
   "d1_databases": [
